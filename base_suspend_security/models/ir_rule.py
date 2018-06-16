@@ -18,6 +18,7 @@
 #
 ##############################################################################
 from openerp import models, api
+from openerp.osv.query import Query
 from ..base_suspend_security import BaseSuspendSecurityUid, SUSPEND_METHOD
 
 
@@ -27,7 +28,7 @@ class IrRule(models.Model):
     @api.model
     def domain_get(self, model_name, mode='read'):
         if isinstance(self.env.uid, BaseSuspendSecurityUid):
-            return [], [], ['"%s"' % self.pool[model_name]._table]
+            return Query(['"%s"' % self.pool[model_name]._table])
         return super(IrRule, self).domain_get(model_name, mode=mode)
 
     def _register_hook(self, cr):
