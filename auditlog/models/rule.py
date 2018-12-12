@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
+import re
 from psycopg2 import ProgrammingError
 from openerp import models, fields, api, modules, _, SUPERUSER_ID, sql_db
 from openerp.exceptions import ValidationError, Warning as UserError
@@ -122,6 +123,8 @@ class AuditlogRule(models.Model):
             self.pool._auditlog_model_cache = {}
         if ids is None:
             ids = self.search(cr, SUPERUSER_ID, [('state', '=', 'subscribed')])
+        self.pool('auditlog.rule.mask')._build_mask_field_cache(
+            cr, SUPERUSER_ID, {})
         return self._patch_methods(cr, SUPERUSER_ID, ids)
 
     @api.multi
@@ -524,6 +527,11 @@ class AuditlogRule(models.Model):
             diff = DictDiffer(
                 new_values.get(res_id, EMPTY_DICT),
                 old_values.get(res_id, EMPTY_DICT))
+
+            # Mask values
+            old_values, new_values = self._mask_field(
+                res_model, old_values, new_values)
+
             if method is 'create':
                 self._create_log_line_on_create(log, diff.added(), new_values)
             elif method is 'read':
@@ -532,6 +540,25 @@ class AuditlogRule(models.Model):
             elif method is 'write':
                 self._create_log_line_on_write(
                     log, diff.changed(), old_values, new_values)
+
+    def _mask_field(self, model, old_values, new_values):
+        """ Checks the contents of the old and new values dict during logging.
+        Checks the model and the fields that are being logged with the cached
+        values and applies a mask on the values when appropriate. """
+        mask_cache = self.pool._auditlog_mask_cache
+        if model in mask_cache:
+            # update old_values
+            for field, mask in mask_cache[model].items():
+                regex = re.compile(mask or '.')
+                for res_id, values in new_values.items():
+                    if field in values:
+                        masked_value = regex.sub('*', values[field])
+                        values[field] = masked_value
+                for res_id, values in new_values.items():
+                    if field in values:
+                        masked_value = regex.sub('*', values[field])
+                        values[field] = masked_value
+        return old_values, new_values
 
     def _get_field(self, model, field_name):
         cache = self.pool._auditlog_field_cache

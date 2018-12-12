@@ -115,6 +115,50 @@
 
         <menuitem id="menu_action_auditlog_rule_tree" parent="menu_audit" action="action_auditlog_rule_tree"/>
 
+        <!-- auditlog.rule.mask -->
+
+        <record id="view_auditlog_rule_mask_form" model="ir.ui.view">
+            <field name="name">auditlog.rule.mask.form</field>
+            <field name="model">auditlog.rule.mask</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group cols="2" colspan="2">
+                            <group>
+                                <field name="model_id" options="{'no_create': True}"/>
+                                <field name="field_id" options="{'no_create': True}" attrs="{'invisible': [('model_id', '=', False)]}"/>
+                                <field name="regex"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_auditlog_rule_mask_tree" model="ir.ui.view">
+            <field name="name">auditlog.rule.mask.tree</field>
+            <field name="model">auditlog.rule.mask</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="model_id"/>
+                    <field name="field_id"/>
+                    <field name="regex"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_auditlog_rule_mask_tree">
+            <field name="name">Masking Rules</field>
+            <field name="res_model">auditlog.rule.mask</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+        </record>
+
+        <menuitem id="menu_action_auditlog_rule_mask_tree" parent="menu_audit" action="action_auditlog_rule_mask_tree"/>
 
         <!-- auditlog.log -->
 
