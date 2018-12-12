@@ -26,6 +26,12 @@ class AuditlogMaskRule(models.Model):
         string="Regular Expression",
         help="Specify a regular expression to replace text with.")
 
+    _sql_constraints = [(
+        'Unique model and field combination',
+        'UNIQUE(model_id, field_id)',
+        'There can only one masking rule per model field.'
+    )]
+
     @api.model
     def create(self, vals):
         """ Refresh the mask cache when a new masking rule is defined. """
@@ -57,7 +63,8 @@ class AuditlogMaskRule(models.Model):
             model = mask.field_id.model_id
             # add model as key
             mask_map.setdefault(model.model, {})
-            mask_map[model.model] = {mask.field_id.name: mask.regex or None}
+            mask_map[model.model].update(
+                {mask.field_id.name: mask.regex or None})
         _logger.info(str(mask_map))
         self.env.registry._auditlog_mask_cache = mask_map
 

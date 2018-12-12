@@ -550,13 +550,15 @@ class AuditlogRule(models.Model):
             # update old_values
             for field, mask in mask_cache[model].items():
                 regex = re.compile(mask or '.')
+
                 for res_id, values in new_values.items():
-                    if field in values:
-                        masked_value = regex.sub('*', values[field])
+                    if field in values and values[field]:
+                        masked_value = regex.sub('*', str(values[field]))
                         values[field] = masked_value
+
                 for res_id, values in new_values.items():
-                    if field in values:
-                        masked_value = regex.sub('*', values[field])
+                    if field in values and values[field]:
+                        masked_value = regex.sub('*', str(values[field]))
                         values[field] = masked_value
         return old_values, new_values
 

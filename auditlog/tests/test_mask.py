@@ -16,7 +16,7 @@ class TestMask(SavepointCase):
         ])
 
         # Create a mask rule
-        cls.mask = cls.env['auditlog.mask.rule'].create({
+        cls.mask = cls.env['auditlog.rule.mask'].create({
             'model_id': cls.field.model_id.id,
             'field_id': cls.field.id,
             'regex': False,
