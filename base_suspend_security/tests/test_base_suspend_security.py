@@ -61,3 +61,8 @@ class TestBaseSuspendSecurity(TransactionCase):
         self.assertEqual(
             BaseSuspendSecurityUid(42), BaseSuspendSecurityUid(42),
         )
+        # Test transient model access
+        wiz = self.env(user=user_id)[
+            'base.language.install'].suspend_security().create(
+                {'lang': 'en_US'})
+        wiz.lang = 'nl_NL'
